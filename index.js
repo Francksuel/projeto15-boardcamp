@@ -14,9 +14,8 @@ const connection = new Pool({
 	connectionString: process.env.DATABASE_URL,
 });
 
-app.get("/", async(req, res) => {
-    const category = await connection.query('SELECT * FROM categories;');
-    
+app.get("/categories", async(req, res) => {
+    const category = await connection.query('SELECT * FROM categories;');    
 	res.send(category.rows);
 });
 
