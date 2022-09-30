@@ -1,16 +1,12 @@
 import { connection } from "../database/db.js";
 
 const getCategories = async (req, res) => {
-	const category = await connection.query("SELECT * FROM categories;");
-	res.send(category.rows);
+	const categories = await connection.query("SELECT * FROM categories;");
+	res.send(categories.rows);
 };
 
 const addCategory = async (req, res) => {
-	const { name } = req.body;
-	if (!name) {
-		return res.sendStatus(400);
-	}
-
+	const { name } = res.locals.category;
 	try {
 		const categories = await connection.query("SELECT * FROM categories;");
 		const isRepeatName = categories.rows.filter(
