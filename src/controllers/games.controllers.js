@@ -1,11 +1,21 @@
 import { connection } from "../database/db.js";
 
 const getGames = async (req, res) => {
+	const name = req.query.name;
 	try {
-		const games = await connection.query(
-			`SELECT games.*, categories.name as "categoryName" 
-            FROM games JOIN categories ON games."categoryId" = categories.id;`
-		);
+		let games = {};
+		if (name) {
+			games = await connection.query(
+				`SELECT games.*, categories.name as "categoryName" 
+			FROM games JOIN categories ON games."categoryId" = categories.id 
+			WHERE LOWER (games.name) LIKE LOWER ('${name}%');`
+			);
+		} else {
+			games = await connection.query(
+				`SELECT games.*, categories.name as "categoryName" 
+				FROM games JOIN categories ON games."categoryId" = categories.id;`
+			);
+		}
 		res.send(games.rows);
 	} catch {
 		res.sendStatus(500);
@@ -14,7 +24,7 @@ const getGames = async (req, res) => {
 
 const addGame = async (req, res) => {
 	const newGame = res.locals.game;
-	try {		
+	try {
 		const categoryName = await connection.query(
 			"SELECT name FROM categories WHERE id=$1;",
 			[newGame.categoryId]
