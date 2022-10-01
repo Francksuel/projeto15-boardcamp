@@ -16,7 +16,7 @@ const customerValidationSchema = (req, res, next) => {
 	}
 	const customerValidation = customerSchema.validate(customer);
 	if (customerValidation.error) {
-		return res.status(400).send(customerValidation.error);
+		return res.sendStatus(400);
 	}      
 	res.locals.customer = customer;
 	next();

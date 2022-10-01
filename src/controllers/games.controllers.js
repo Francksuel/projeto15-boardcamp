@@ -8,7 +8,7 @@ const getGames = async (req, res) => {
 			games = await connection.query(
 				`SELECT games.*, categories.name as "categoryName" 
 			FROM games JOIN categories ON games."categoryId" = categories.id 
-			WHERE LOWER (games.name) LIKE LOWER ('${name}%');`
+			WHERE games.name ILIKE $1;`,[`${name}%`]
 			);
 		} else {
 			games = await connection.query(
