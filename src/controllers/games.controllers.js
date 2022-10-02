@@ -40,7 +40,7 @@ const addGame = async (req, res) => {
 			return res.sendStatus(409);
 		}
 		await connection.query(
-			'INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1,$2,$3,$4,$5)',
+			'INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1,$2,$3,$4,$5);',
 			[
 				newGame.name,
 				newGame.image,
