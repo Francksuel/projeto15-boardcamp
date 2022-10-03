@@ -49,42 +49,42 @@ const getRentals = async (req, res) => {
 	}
 };
 
-const insertRental = async (req, res) => {
-	const rental = res.locals.rental;
+const insertRent = async (req, res) => {
+	const rent = res.locals.rent;
 	try {
 		const customer = await connection.query(
 			`SELECT * FROM customers WHERE customers.id = $1;`,
-			[rental.customerId]
+			[rent.customerId]
 		);
 		const game = await connection.query(
 			`SELECT * FROM games WHERE games.id = $1;`,
-			[rental.gameId]
+			[rent.gameId]
 		);
 		if (customer.rows.length === 0 || game.rows.length === 0) {
 			return res.sendStatus(400);
 		}
 		const rentalsGame = await connection.query(
 			`SELECT * FROM rentals WHERE rentals."gameId" = $1;`,
-			[rental.gameId]
+			[rent.gameId]
 		);
 		if (rentalsGame.rows.length >= game.rows[0].stockTotal) {
 			return res.sendStatus(400);
 		}
-		rental["returnDate"] = null;
-		rental["delayFee"] = null;
-		rental["rentDate"] = new Date(Date.now());
-		rental["originalPrice"] = rental.daysRented * game.rows[0].pricePerDay;
+		rent["returnDate"] = null;
+		rent["delayFee"] = null;
+		rent["rentDate"] = new Date(Date.now());
+		rent["originalPrice"] = rent.daysRented * game.rows[0].pricePerDay;
 
 		await connection.query(
 			`INSERT INTO rentals ("customerId", "gameId","rentDate", "daysRented","returnDate" ,"originalPrice","delayFee" ) VALUES ($1,$2,$3,$4,$5,$6,$7);`,
 			[
-				rental.customerId,
-				rental.gameId,
-				rental.rentDate,
-				rental.daysRented,
-				rental.returnDate,
-				rental.originalPrice,
-				rental.delayFee,
+				rent.customerId,
+				rent.gameId,
+				rent.rentDate,
+				rent.daysRented,
+				rent.returnDate,
+				rent.originalPrice,
+				rent.delayFee,
 			]
 		);
 		res.sendStatus(201);
@@ -93,37 +93,61 @@ const insertRental = async (req, res) => {
 	}
 };
 
-const finishRental = async (req, res) => {
+const finishRent = async (req, res) => {
 	const id = req.params.id;
 	try {
-		const rental = (
+		const rent = (
 			await connection.query(
 				`SELECT * FROM rentals JOIN games ON rentals."gameId"=games.id WHERE rentals.id = $1;`,
 				[id]
 			)
 		).rows;
-		if (rental.length === 0) {
+		if (rent.length === 0) {
 			return res.sendStatus(404);
 		}
-		if (rental[0].returnDate !== null) {
+		if (rent[0].returnDate !== null) {
 			return res.sendStatus(400);
 		}
-		rental[0].returnDate = new Date(Date.now());
+		rent[0].returnDate = new Date(Date.now());
 		const diff =
-			Math.floor((rental[0].returnDate - rental[0].rentDate) / 86400000) -
-			rental[0].daysRented;
+			Math.floor((rent[0].returnDate - rent[0].rentDate) / 86400000) -
+			rent[0].daysRented;
 		if (diff <= 0) {
-			rental[0].delayFee = 0;
+			rent[0].delayFee = 0;
 		} else {
-			rental[0].delayFee = rental[0].pricePerDay * diff;
+			rent[0].delayFee = rent[0].pricePerDay * diff;
 		}
 		await connection.query(
 			`UPDATE rentals SET "returnDate" = $1, "delayFee" = $2  WHERE rentals.id = $3`,
-			[rental[0].returnDate, rental[0].delayFee, id]
+			[rent[0].returnDate, rent[0].delayFee, id]
 		);
 		res.sendStatus(200);
 	} catch {
 		res.sendStatus(500);
 	}
 };
-export { insertRental, getRentals, finishRental };
+
+const deleteRent = async (req, res) => {
+	const id = req.params.id;
+	try {
+		const rent = (
+			await connection.query(
+				`SELECT * FROM rentals JOIN games ON rentals."gameId"=games.id WHERE rentals.id = $1;`,
+				[id]
+			)
+		).rows;
+		if (rent.length === 0) {
+			return res.sendStatus(404);
+		}
+		if (rent[0].returnDate === null) {
+			return res.sendStatus(400);
+		}
+
+		await connection.query(`DELETE FROM rentals WHERE rentals.id = $1`, [id]);
+		res.sendStatus(200);
+	} catch {
+		res.sendStatus(500);
+	}
+};
+
+export { insertRent, getRentals, finishRent, deleteRent };

@@ -8,6 +8,6 @@ import { categoryValidationSchema } from "../middlewares/category.middleware.js"
 const categoriesRouter = express.Router();
 
 categoriesRouter.get("/categories", getCategories);
-categoriesRouter.post("/categories",categoryValidationSchema, addCategory);
+categoriesRouter.post("/categories", categoryValidationSchema, addCategory);
 
 export { categoriesRouter };

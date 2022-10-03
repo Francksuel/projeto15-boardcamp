@@ -5,6 +5,6 @@ import { gameValidationSchema } from "../middlewares/game.middleware.js";
 const gamesRouter = express.Router();
 
 gamesRouter.get("/games", getGames);
-gamesRouter.post("/games",gameValidationSchema, addGame);
+gamesRouter.post("/games", gameValidationSchema, addGame);
 
 export { gamesRouter };

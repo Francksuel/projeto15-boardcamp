@@ -12,12 +12,12 @@ const customerValidationSchema = (req, res, next) => {
 	const customer = req.body;
 	const firstValidation = customerSchema.validate(customer);
 	if (!firstValidation.error) {
-		customer.name = stripHtml(customer.name).result.trim();        
+		customer.name = stripHtml(customer.name).result.trim();
 	}
 	const customerValidation = customerSchema.validate(customer);
 	if (customerValidation.error) {
 		return res.sendStatus(400);
-	}      
+	}
 	res.locals.customer = customer;
 	next();
 };
